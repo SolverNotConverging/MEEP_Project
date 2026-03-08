@@ -45,25 +45,31 @@ Each run writes results into that folder's optimization-results directory, inclu
 - `best_gen_*.csv` (main data to share)
 - plot/geometry PNG files (optional to share)
 
-## Sharing Generated CSV Through GitHub
+## Collaboration Workflow (Branch + PR)
 
-After a run, commit and push the new CSV files so collaborators can pull them.
+When contributing results, use a branch and pull request instead of pushing directly to `main`.
 
+1. Sync and create a branch:
 ```bash
 git pull
-# run simulation
+git checkout -b <your-branch-name>
+```
 
+2. Run your assigned simulation(s).
+
+3. Commit the generated CSV outputs:
+```bash
 git add GA_SW_suppression_TM/**/optimization_results*/best_gen_*.csv
 git commit -m "Add TM GA CSV results for <length/range>"
-git push
+git push -u origin <your-branch-name>
 ```
 
-Collaborators then run:
+4. Open a Pull Request on GitHub from your branch into `main`.
+
+5. After PR approval and merge, everyone updates with:
 ```bash
 git pull
 ```
-
-to get both the latest code and generated CSV outputs.
 
 ## Operational Notes
 
