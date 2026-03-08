@@ -215,16 +215,22 @@ plt.tight_layout()
 # =======================================================================
 
 def create_random_genome():
-    return [random.choice([0, 1, 2, 3]) for _ in range(NUM_SEGMENTS)]
+    genome = [random.choice([0, 1, 2, 3]) for _ in range(NUM_SEGMENTS)]
+    if NUM_SEGMENTS > 0:
+        genome[0] = random.choice([1, 2, 3])
+        genome[-1] = random.choice([1, 2, 3])
+    return genome
 
 
 def mutate(genome):
     new_genome = genome[:]
     for i in range(len(new_genome)):
         if random.random() < MUTATION_RATE:
-            new_genome[i] = random.choice([0, 1, 2, 3])
+            if i == 0 or i == len(new_genome) - 1:
+                new_genome[i] = random.choice([1, 2, 3])
+            else:
+                new_genome[i] = random.choice([0, 1, 2, 3])
     return new_genome
-
 
 def crossover(parent1, parent2):
     point = random.randint(1, NUM_SEGMENTS - 1)
@@ -255,7 +261,12 @@ def save_generation_results(gen_num, loss, genome, T, R, L):
 
 print(f"--- Starting Optimization ({GENERATIONS} Gens) ---")
 
-population = [create_random_genome() for _ in range(POPULATION_SIZE)]
+half_segments = (NUM_SEGMENTS + 1) // 2
+seed_gene_1 = [2] * half_segments + [1] * (NUM_SEGMENTS - half_segments)
+seed_gene_2 = [1] * half_segments + [2] * (NUM_SEGMENTS - half_segments)
+population = [seed_gene_1, seed_gene_2]
+while len(population) < POPULATION_SIZE:
+    population.append(create_random_genome())
 history_loss = []
 
 # Global best tracking
@@ -352,3 +363,5 @@ plt.show()
 
 # (Optional: The loop already exported the final generation, so Step 8 is redundant,
 # but kept here if you want a specifically named 'final' file)
+
+
