@@ -175,10 +175,10 @@ def calculate_fitness(genome):
     R = np.clip(R, 0, 1)
     L = 1 - T - R
 
-    # Loss Function: Minimize Max T and Average T
-    loss = np.mean(T) + 0.5 * np.max(T) + np.mean(L) + 0.5 * np.max(L)
+    # Fitness Function: maximize reflection
+    fitness = np.mean(R) + np.min(R)
 
-    return loss, T, R, L
+    return fitness, T, R, L
 
 
 # =======================================================================
@@ -186,15 +186,15 @@ def calculate_fitness(genome):
 # =======================================================================
 
 plt.ion()  # Enable Interactive Mode
-fig, (ax_loss, ax_trl) = plt.subplots(1, 2, figsize=(12, 5))
+fig, (ax_fitness, ax_trl) = plt.subplots(1, 2, figsize=(12, 5))
 
 # Setup Loss Plot
-line_loss, = ax_loss.plot([], [], 'r-o', label='Best Loss')
-ax_loss.set_title("Optimization Progress")
-ax_loss.set_xlabel("Generation")
-ax_loss.set_ylabel("Loss Function")
-ax_loss.grid(True)
-ax_loss.legend()
+line_fitness, = ax_fitness.plot([], [], 'r-o', label='Best Fitness')
+ax_fitness.set_title("Optimization Progress")
+ax_fitness.set_xlabel("Generation")
+ax_fitness.set_ylabel("Fitness")
+ax_fitness.grid(True)
+ax_fitness.legend()
 
 # Setup TRL Plot
 line_T, = ax_trl.plot(flux_freqs, np.zeros_like(flux_freqs), 'b-', label='T', linewidth=2)
@@ -239,7 +239,7 @@ def crossover(parent1, parent2):
     return child1, child2
 
 
-def save_generation_results(gen_num, loss, genome, T, R, L):
+def save_generation_results(gen_num, fitness, genome, T, R, L):
     """Exports the best results of the current generation to a CSV."""
     filename = f"{OUTPUT_DIR}/best_gen_{gen_num}.csv"
     with open(filename, mode='w', newline='') as file:
@@ -248,7 +248,7 @@ def save_generation_results(gen_num, loss, genome, T, R, L):
         # Header Info
         writer.writerow(["Parameter", "Value"])
         writer.writerow(["Generation", gen_num])
-        writer.writerow(["Best Loss", loss])
+        writer.writerow(["Best Fitness", fitness])
         writer.writerow(["Genome", str(genome)])
         writer.writerow([])
 
@@ -267,10 +267,10 @@ seed_gene_2 = [1] * half_segments + [2] * (NUM_SEGMENTS - half_segments)
 population = [seed_gene_1, seed_gene_2]
 while len(population) < POPULATION_SIZE:
     population.append(create_random_genome())
-history_loss = []
+history_fitness = []
 
 # Global best tracking
-best_global_loss = float('inf')
+best_global_fitness = -float('inf')
 best_global_genome = None
 best_global_T = None
 best_global_R = None
@@ -281,11 +281,11 @@ for gen in range(GENERATIONS):
 
     # Evaluate Population
     for i, genome in enumerate(population):
-        loss, T, R, L = calculate_fitness(genome)
-        ranked_population.append((loss, genome))
+        fitness, T, R, L = calculate_fitness(genome)
+        ranked_population.append((fitness, genome))
 
-        if loss < best_global_loss:
-            best_global_loss = loss
+        if fitness > best_global_fitness:
+            best_global_fitness = fitness
             best_global_genome = genome
             # Capture the spectral data for the global best
             best_global_T = T
@@ -296,29 +296,29 @@ for gen in range(GENERATIONS):
             line_T.set_ydata(T)
             line_R.set_ydata(R)
             line_L.set_ydata(L)
-            ax_trl.set_title(f"Best Result (Gen {gen + 1}) - Loss: {loss:.4f}")
+            ax_trl.set_title(f"Best Result (Gen {gen + 1}) - Fitness: {fitness:.4f}")
             fig.canvas.flush_events()
             plt.draw()
 
     # Sort to find best in this batch
-    ranked_population.sort(key=lambda x: x[0])
-    current_best_loss = ranked_population[0][0]
-    history_loss.append(current_best_loss)
+    ranked_population.sort(key=lambda x: x[0], reverse=True)
+    current_best_fitness = ranked_population[0][0]
+    history_fitness.append(current_best_fitness)
 
     # --- UPDATE LOSS PLOT ---
-    line_loss.set_data(range(1, len(history_loss) + 1), history_loss)
-    ax_loss.relim()
-    ax_loss.autoscale_view()
+    line_fitness.set_data(range(1, len(history_fitness) + 1), history_fitness)
+    ax_fitness.relim()
+    ax_fitness.autoscale_view()
     fig.canvas.flush_events()
     plt.draw()
     plt.pause(0.01)
 
-    print(f"Gen {gen + 1}/{GENERATIONS} | Best Loss: {current_best_loss:.4f}")
+    print(f"Gen {gen + 1}/{GENERATIONS} | Best Fitness: {current_best_fitness:.4f}")
 
     # --- EXPORT DATA FOR THIS GENERATION ---
     # We export the GLOBAL best found so far (safest bet),
     # but strictly associated with the current generation count.
-    save_generation_results(gen + 1, best_global_loss, best_global_genome,
+    save_generation_results(gen + 1, best_global_fitness, best_global_genome,
                             best_global_T, best_global_R, best_global_L)
 
     # Next Gen Setup
@@ -326,8 +326,8 @@ for gen in range(GENERATIONS):
     while len(next_generation) < POPULATION_SIZE:
         c1 = random.sample(ranked_population, 3)
         c2 = random.sample(ranked_population, 3)
-        p1 = min(c1, key=lambda x: x[0])[1]
-        p2 = min(c2, key=lambda x: x[0])[1]
+        p1 = max(c1, key=lambda x: x[0])[1]
+        p2 = max(c2, key=lambda x: x[0])[1]
 
         child1, child2 = crossover(p1, p2)
         next_generation.append(mutate(child1))
@@ -342,7 +342,7 @@ for gen in range(GENERATIONS):
 plt.ioff()  # Turn off interactive mode
 
 print(f"--- Optimization Finished ---")
-print(f"Final Best Loss: {best_global_loss}")
+print(f"Final Best Fitness: {best_global_fitness}")
 print(f"Best Genome: {best_global_genome}")
 
 # Create a new figure for the Geometry
@@ -358,10 +358,11 @@ sim_final = mp.Simulation(cell_size=CELL_SIZE,
 
 # Plot the 2D Geometry
 sim_final.plot2D()
-plt.title(f"Optimized Topology (Loss: {best_global_loss:.3f})")
+plt.title(f"Optimized Topology (Fitness: {best_global_fitness:.3f})")
 plt.show()
 
 # (Optional: The loop already exported the final generation, so Step 8 is redundant,
 # but kept here if you want a specifically named 'final' file)
+
 
 

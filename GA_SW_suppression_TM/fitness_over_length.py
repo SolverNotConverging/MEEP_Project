@@ -10,7 +10,7 @@ LENGTH_DIR_PATTERN = re.compile(r"^(\d+)_(\d+)mm$")
 
 
 def parse_csv_data(csv_path: Path):
-    best_loss = None
+    best_fitness = None
     genome = None
 
     with csv_path.open("r", newline="") as f:
@@ -21,18 +21,24 @@ def parse_csv_data(csv_path: Path):
             key = row[0].strip()
             value = row[1].strip()
 
-            if key == "Best Loss":
+            if key == "Best Fitness":
                 try:
-                    best_loss = float(value)
+                    best_fitness = float(value)
                 except ValueError:
-                    best_loss = None
+                    best_fitness = None
+            elif key == "Best Loss":
+                try:
+                    legacy_loss = float(value)
+                    best_fitness = 1.5 - legacy_loss
+                except ValueError:
+                    best_fitness = None
             elif key == "Genome":
                 try:
                     genome = ast.literal_eval(value)
                 except (ValueError, SyntaxError):
                     genome = value
 
-    return best_loss, genome
+    return best_fitness, genome
 
 
 def parse_length_from_dir_name(dir_name: str):
@@ -90,30 +96,30 @@ def collect_newest_data(length_dirs):
             print(f"[SKIP] {length_mm}mm: no CSV found")
             continue
 
-        best_loss, genome = parse_csv_data(newest_csv)
-        if best_loss is None:
-            print(f"[SKIP] {length_mm}mm: missing Best Loss in {newest_csv}")
+        best_fitness, genome = parse_csv_data(newest_csv)
+        if best_fitness is None:
+            print(f"[SKIP] {length_mm}mm: missing Best Fitness/Best Loss in {newest_csv}")
             continue
 
         results.append(
             {
                 "length_mm": length_mm,
                 "csv_path": newest_csv,
-                "best_loss": best_loss,
+                "best_fitness": best_fitness,
                 "genome": genome,
             }
         )
 
         print(
             f"[OK] {length_mm}mm -> {newest_csv.name}, "
-            f"best_loss={best_loss:.6f}, genome={genome}"
+            f"best_fitness={best_fitness:.6f}, genome={genome}"
         )
 
     results.sort(key=lambda item: item["length_mm"])
     return results
 
 
-def plot_loss_over_length(results, output_path: Path):
+def plot_fitness_over_length(results, output_path: Path):
     if not results:
         print("No valid data to plot.")
         return
@@ -125,23 +131,23 @@ def plot_loss_over_length(results, output_path: Path):
         return
 
     x = [item["length_mm"] for item in results]
-    y = [item["best_loss"] for item in results]
+    y = [item["best_fitness"] for item in results]
 
     plt.figure(figsize=(8, 5))
     plt.plot(x, y, marker="o", linewidth=2)
     for item in results:
         plt.annotate(
             str(item["genome"]),
-            (item["length_mm"], item["best_loss"]),
+            (item["length_mm"], item["best_fitness"]),
             textcoords="offset points",
             xytext=(0, 10),
             ha="center",
             fontsize=8,
         )
 
-    plt.title("Newest Gene Best Loss vs Length (TM)")
+    plt.title("Newest Gene Best Fitness vs Length (TM)")
     plt.xlabel("Length (mm)")
-    plt.ylabel("Best Loss")
+    plt.ylabel("Best Fitness")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig(output_path, dpi=200)
@@ -152,7 +158,7 @@ def plot_loss_over_length(results, output_path: Path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Find newest gene CSV for all length folders and plot Best Loss vs length."
+        description="Find newest gene CSV for all length folders and plot Best Fitness vs length."
     )
     parser.add_argument(
         "--base-dir",
@@ -163,7 +169,7 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("loss_over_length_TM.png"),
+        default=Path("fitness_over_length_TM.png"),
         help="Output image path for the plot.",
     )
     args = parser.parse_args()
@@ -174,7 +180,7 @@ def main():
         return
 
     results = collect_newest_data(length_dirs)
-    plot_loss_over_length(results, args.output)
+    plot_fitness_over_length(results, args.output)
 
 
 if __name__ == "__main__":
