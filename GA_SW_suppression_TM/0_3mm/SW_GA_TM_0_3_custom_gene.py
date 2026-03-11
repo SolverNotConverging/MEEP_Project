@@ -22,11 +22,11 @@ DF = 0.05
 NFREQ = 100
 
 OPT_X_START = 0.0
-OPT_X_END = 1.8
+OPT_X_END = 0.3
 MIN_FEATURE_SIZE = 0.3
 NUM_SEGMENTS = int(round((OPT_X_END - OPT_X_START) / MIN_FEATURE_SIZE))
 
-OUTPUT_DIR = 'optimization_results_1_8mm'
+OUTPUT_DIR = 'optimization_results_0_3mm'
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(CURRENT_DIR, OUTPUT_DIR)
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -35,10 +35,9 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 # Examples:
 # USER_GENOMES = [[1, 3, 3]]
 # USER_GENOMES = [[1, 3, 3], [3, 1, 3]]
-USER_GENOMES = [[2, 2, 2, 1, 1, 1],
-                [2, 2, 2, 2, 0, 1],
-                [2, 2, 2, 0, 1, 1],
-                [2, 2, 0, 1, 1, 1],
+USER_GENOMES = [[1],
+                [2],
+                [3]
                 ]
 
 

@@ -35,7 +35,9 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 # Examples:
 # USER_GENOMES = [[1, 3, 3]]
 # USER_GENOMES = [[1, 3, 3], [3, 1, 3]]
-USER_GENOMES = []
+
+USER_GENOMES = [[2, 2, 2, 2, 2],
+                ]
 
 
 # =======================================================================
