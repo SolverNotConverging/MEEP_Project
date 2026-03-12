@@ -8,8 +8,8 @@ Use GitHub as the single source of truth for code and generated CSV results.
 
 1. Clone the repo
 ```bash
-git clone <your-repo-url>
-cd GA_based_Geometry_Optimization_for_Surface_Wave_Reflection
+git clone https://github.com/SolverNotConverging/MEEP_Project.git
+cd MEEP_Project
 ```
 
 2. Create and activate your Python/Meep environment (WSL + Ubuntu recommended)
@@ -50,7 +50,7 @@ python SW_GA_TM_3_0_v1.py
 ## Solver Versions
 
 - `v1` is the original GA solver. It starts from two structured seed genomes, fills the rest of the population randomly, and exports the best-so-far result for every generation of that run.
-- `v2` is the continuation solver that used to be called `v3`. It seeds the population from nearby stored results when available, including the current length, the previous length, the next length, and the original `v1` structured seeds. It only appends a new CSV when the current run beats the stored best fitness for that length.
+- `v2` is the continuation solver. It seeds the population from nearby stored results when available, including the current length, the previous length, the next length, and the original `v1` structured seeds. It only appends a new CSV when the current run beats the stored best fitness for that length.
 - `*_custom_gene.py` is separate from the optimizer versions. It is for manually testing user-provided genomes against the same solver setup.
 
 ## Outputs
@@ -87,7 +87,7 @@ git pull
 
 ## Operational Notes
 
-- If loss does not improve for more than 5 generations, early stop is acceptable.
+- If fitness does not improve for more than 10 generations, early stop is acceptable.
 - If a WSL run is stuck and IDE stop does not work:
 ```bash
 pkill -f python
