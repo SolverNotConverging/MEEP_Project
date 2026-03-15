@@ -6,7 +6,7 @@ import numpy as np
 
 
 LENGTH_DIR_SUFFIX = "mm"
-BEST_CSV_NAME = "best_gen_1.csv"
+BEST_CSV_NAME = "3_0.csv"
 
 
 def is_length_dir(path: Path) -> bool:
@@ -134,7 +134,7 @@ def reevaluate_results_dir(results_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Recompute CSV fitness as mean(R), keep the best CSV per length, and save it as best_gen_1.csv."
+        description="Recompute CSV fitness as mean(R), keep the best CSV per length, and save it as 3_0.csv."
     )
     parser.add_argument(
         "--base-dir",

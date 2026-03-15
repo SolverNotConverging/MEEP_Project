@@ -110,11 +110,12 @@ def plot_mean_r_over_length(records):
     lengths = [item[0] for item in records]
     mean_r_values = [item[1] for item in records]
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(5, 3), dpi=300)
     plt.plot(lengths, mean_r_values, 'o-', linewidth=2, markersize=6)
+    plt.xlim(0, 9.3)
+    plt.ylim(0.2, 0.85)
     plt.xlabel('Length (mm)')
-    plt.ylabel('Mean R')
-    plt.title('Best Mean R over Length (TM)')
+    plt.ylabel('Fitness')
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(OUTPUT_PNG, dpi=300)

@@ -11,14 +11,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PNG = os.path.join(BASE_DIR, "cst_6_0mm_sparams.png")
 
 STRUCTURES = [
-    ("MS_SWL_no_block.s2p", "No block", "-"),
-    ("MS_SWL_ground_strip.s2p", "Ground strip", "--"),
-    ("MS_SWL_GA.s2p", "Genetic Algorithm Optimized", "-."),
-    ("MS_SWL_uniplanar.s2p", "Uniplanar", ":"),
+    ("MS_SWL_no_block.s2p", "No Suppression", "-"),
+    ("MS_SWL_ground_strip.s2p", "Ground Slots", "--"),
+    ("MS_SWL_uniplanar.s2p", "Uniplanar EBG", ":"),
+    ("MS_SWL_GA.s2p", "GA Optimized", "-."),
+
 ]
 
 S11_COLORS = ['#F08080', '#FF6347', '#DC143C', '#8B0000']
-S21_COLORS = ['#90EE90', '#32CD32', '#228B22', '#006400']
+# S21_COLORS = ['#90EE90', '#32CD32', '#228B22', '#006400']
+S21_COLORS = ['y', 'g', 'b', 'c']
 
 
 def load_touchstone_ri(file_path):
@@ -51,35 +53,35 @@ def magnitude_db(values):
 
 
 def plot_sparameters():
-    plt.figure(figsize=(6, 4), dpi=300)
+    plt.figure(figsize=(5, 3), dpi=300)
 
     for index, (filename, label, linestyle) in enumerate(STRUCTURES):
         file_path = os.path.join(BASE_DIR, filename)
         freq_ghz, s11, s21 = load_touchstone_ri(file_path)
 
-        plt.plot(
-            freq_ghz,
-            magnitude_db(s11),
-            color=S11_COLORS[index],
-            linestyle=linestyle,
-            linewidth=1.5,
-            label=f"{label} S11",
-        )
+        # plt.plot(
+        #     freq_ghz,
+        #     magnitude_db(s11),
+        #     color=S11_COLORS[index],
+        #     linestyle=linestyle,
+        #     linewidth=1.5,
+        #     label=f"{label} S11",
+        # )
         plt.plot(
             freq_ghz,
             magnitude_db(s21),
             color=S21_COLORS[index],
             linestyle=linestyle,
-            linewidth=1.5,
-            label=f"{label} S21",
+            linewidth=2,
+            label=rf" $S_{{21}}$ {label}",
         )
 
     plt.xlabel("Frequency (GHz)")
     plt.ylabel("Magnitude (dB)")
     plt.xlim(15, 30)
-    plt.ylim(-40, 0)
+    plt.ylim(-35, 0)
     plt.grid(True, alpha=0.3)
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.tight_layout()
     plt.savefig(OUTPUT_PNG, dpi=300)
     plt.show()

@@ -10,7 +10,7 @@ import ast  # Safer way to parse string lists "[1, 0, ...]"
 
 # ---------------------------------------------------------
 # UPDATE THIS FILENAME to the file you want to read
-CSV_FILENAME = "optimization_results_6_0mm/best_gen_5.csv"
+CSV_FILENAME = "optimization_results_6_0mm/best_gen_4.csv"
 # ---------------------------------------------------------
 
 # Simulation Constants
